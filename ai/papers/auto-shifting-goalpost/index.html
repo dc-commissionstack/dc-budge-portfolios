@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10110f">
+  <meta name="description" content="How large language models manufacture thresholds to justify a prompt's premise. A case study in credit-score reasoning by D.C. Budge.">
+  <meta property="og:title" content="The Auto-Shifting Goalpost | D.C. Budge">
+  <meta property="og:description" content="How large language models manufacture thresholds to justify a prompt's premise. Part I of The Fallacy of Inference and Iniquities of Algorithmic Justification.">
+  <meta property="og:type" content="article">
+  <title>The Auto-Shifting Goalpost | D.C. Budge</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap');
+    :root{color-scheme:dark;--ink:#10110f;--paper:#ebe6d9;--body:#d6d3c8;--muted:#a9a99c;--line:rgba(235,230,217,.18);--gold:#c7aa7a;--serif:'Playfair Display',Georgia,serif;--read:'Source Serif 4',Georgia,serif;--sans:'DM Sans',Arial,sans-serif}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--ink);color:var(--paper);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+    a{color:inherit}a:focus-visible{outline:2px solid var(--gold);outline-offset:4px}::selection{background:var(--gold);color:var(--ink)}
+    .skip{position:absolute;top:-80px;left:12px;background:var(--paper);color:var(--ink);padding:12px;z-index:30}.skip:focus{top:12px}
+    .wrap{width:min(100% - 48px,1180px);margin:auto}
+    .topbar{border-bottom:1px solid var(--line)}.topbar .wrap{display:flex;align-items:center;justify-content:space-between;min-height:74px;gap:20px}
+    .wordmark{text-decoration:none;font-family:var(--serif);font-size:1.12rem;letter-spacing:-.04em}.wordmark span{color:var(--gold)}
+    .topbar nav{display:flex;gap:28px}.topbar nav a{text-decoration:none;text-transform:uppercase;letter-spacing:.17em;font-size:.66rem;font-weight:700}.topbar nav a:hover{color:var(--gold)}
+    .eyebrow{text-transform:uppercase;letter-spacing:.23em;font-size:.68rem;font-weight:700;color:var(--gold)}
+    header.title{position:relative;isolation:isolate;overflow:hidden;padding:110px 0 80px;border-bottom:1px solid var(--line)}
+    header.title:before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,#10110f 18%,rgba(16,17,15,.88) 52%,rgba(16,17,15,.55)),url('../../vango_writing.png') right 40%/cover no-repeat;opacity:.75}
+    .series{display:block;font-family:var(--serif);font-style:italic;font-size:clamp(1.05rem,1.8vw,1.35rem);color:#d8cfbc;margin:22px 0 0;max-width:760px;line-height:1.4}
+    .series small{display:block;font-family:var(--sans);font-style:normal;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+    h1{font:400 clamp(3rem,7vw,6.4rem)/1.02 var(--serif);letter-spacing:-.06em;margin:34px 0 22px;max-width:980px}
+    .subtitle{font-family:var(--read);font-size:clamp(1.1rem,1.8vw,1.35rem);line-height:1.5;color:#d0cdc1;max-width:760px;margin:0}
+    .byline{margin-top:38px;display:flex;flex-wrap:wrap;gap:10px 26px;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}.byline strong{color:var(--paper);font-weight:600}
+    article{padding:80px 0 110px}
+    .prose{max-width:690px;margin:auto;font-family:var(--read);font-size:1.14rem;line-height:1.8;color:var(--body)}
+    .prose h2{font:400 clamp(1.9rem,3.2vw,2.5rem)/1.15 var(--serif);letter-spacing:-.035em;color:var(--paper);margin:72px 0 22px}
+    .prose h2 .n{display:block;font-family:var(--sans);font-size:.66rem;letter-spacing:.2em;color:var(--gold);margin-bottom:12px}
+    .prose p{margin:0 0 1.35em}
+    .abstract{border:1px solid var(--line);background:#181a17;padding:34px 36px 12px;margin:0 0 20px}
+    .abstract .eyebrow{display:block;margin-bottom:14px}
+    .trials{width:100%;border-collapse:collapse;margin:8px 0 34px;font-family:var(--sans);font-size:.9rem}
+    .trials caption{text-align:left;font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);padding-bottom:10px}
+    .trials th,.trials td{text-align:left;padding:13px 12px;border-bottom:1px solid var(--line)}.trials th{color:var(--gold);font-weight:600;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase}.trials td:last-child{color:var(--paper);font-weight:600}
+    blockquote.pull{margin:44px 0;padding:0 0 0 26px;border-left:2px solid var(--gold);font:400 clamp(1.45rem,2.6vw,1.9rem)/1.35 var(--serif);letter-spacing:-.02em;color:var(--paper)}
+    .cited{margin-top:72px;padding-top:30px;border-top:1px solid var(--line);font-size:1rem}
+    .cited h2{margin-top:0}.cited p{padding-left:2em;text-indent:-2em}
+    .back{display:inline-flex;gap:14px;align-items:center;text-decoration:none;border:1px solid var(--gold);min-height:50px;padding:0 18px;text-transform:uppercase;letter-spacing:.15em;font-size:.66rem;font-weight:700;font-family:var(--sans);margin-top:30px;transition:background .25s,color .25s}.back:hover{background:var(--gold);color:var(--ink)}
+    .footer{border-top:1px solid var(--line);padding:30px 0 40px;color:var(--muted);font-size:.72rem;letter-spacing:.07em}.footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap}.footer a{text-decoration:none;color:var(--paper)}
+    @media(max-width:600px){.wrap{width:min(100% - 32px,1180px)}.topbar nav{gap:14px}.topbar nav a{font-size:.58rem;letter-spacing:.1em}header.title{padding:70px 0 56px}.prose{font-size:1.06rem}.abstract{padding:26px 22px 6px}.trials{font-size:.82rem}.trials th,.trials td{padding:11px 6px}}
+    @media print{body{background:#fff;color:#111}header.title:before,.topbar,.footer,.back{display:none}.prose,.prose h2,blockquote.pull,.trials td:last-child{color:#111}}
+  </style>
+</head>
+<body>
+  <a class="skip" href="#paper">Skip to the paper</a>
+  <div class="topbar"><div class="wrap"><a class="wordmark" href="../../">SELECTED<span> / </span>WORK</a><nav aria-label="Main navigation"><a href="../../#writing">Writing</a><a href="../../">AI portfolio</a><a href="../../../">All portfolios</a></nav></div></div>
+  <main>
+    <header class="title">
+      <div class="wrap">
+        <span class="eyebrow">Research paper &nbsp;/&nbsp; AI evaluation</span>
+        <span class="series"><small>A series &middot; Part I</small>The Fallacy of Inference and Iniquities of Algorithmic Justification</span>
+        <h1>The Auto-Shifting Goalpost</h1>
+        <p class="subtitle">Algorithmic Justification and the Illusion of Rigidity in Large Language Models</p>
+        <div class="byline"><span>By <strong>D.C. Budge</strong></span><span><time datetime="2026-10-22">October 22, 2026</time></span></div>
+      </div>
+    </header>
+
+    <article id="paper">
+      <div class="wrap"><div class="prose">
+        <section class="abstract" aria-labelledby="abstract-title">
+          <span class="eyebrow" id="abstract-title">Abstract</span>
+          <p>This paper examines a critical architectural flaw in contemporary Large Language Models (LLMs): the propensity for algorithmic justification and probabilistic goalpost-shifting. Through a live case study involving credit score thresholds in corporate banking structures, this paper demonstrates how LLMs prioritize narrative cohesion and conversational compliance over empirical consistency. When presented with varying datasets, the model dynamically establishes artificial thresholds to satisfy a structural premise, revealing an inherent bias toward authoritative fabrication. This critique challenges the reliability of LLMs as objective analytical tools in high-stakes financial and strategic decision-making.</p>
+        </section>
+
+        <h2><span class="n">I</span>Introduction</h2>
+        <p>The proliferation of generative artificial intelligence has positioned Large Language Models as proxy domain experts in economics, law, and corporate strategy. Users increasingly rely on these systems to navigate complex regulatory landscapes, such as trust structures, corporate holding companies, and banking underwriting guidelines. However, a systemic vulnerability lies beneath the confident, professional prose of the LLM: probabilistic pattern matching.</p>
+        <p>Rather than cross-referencing an unchanging, objective database of factual truths, LLMs generate text based on the statistical likelihood of word sequences. This paper presents an empirical critique of this mechanism, documenting a phenomenon the author terms &ldquo;The Auto-Shifting Goalpost&rdquo;&mdash;the dynamic fabrication of structural thresholds to retroactively justify a prompt&rsquo;s premise.</p>
+
+        <h2><span class="n">II</span>Case Study: The Shifting Credit Threshold</h2>
+        <p>The investigation began with a comparative inquiry regarding business financing. The baseline premise presented to the LLM involved two individuals trying to secure capital via an intricate corporate structure involving multiple LLCs and a trust shell. Person A (the user) possessed a substandard credit score, while Person B (a peer) possessed a slightly higher score and successfully obtained financing. The LLM was tasked with explaining the systemic divergence.</p>
+        <p>In the primary trial, the user specified a personal score of 640 and a peer score of 670. The LLM responded with high analytical confidence, declaring that 670 was the &ldquo;exact threshold for &lsquo;Good&rsquo; tier personal credit&rdquo; and the precise boundary where automated underwriting algorithms grant approval.</p>
+        <p>To test the rigidity of this logical deduction, a parallel control trial was executed from a separate account and device. In this iteration, the user adjusted the metrics, stating a personal score of 650 and a peer score of 660. Rather than maintaining the previously established benchmark of 670&mdash;which would render both individuals in the control trial ineligible&mdash;the LLM dynamically shifted its narrative. It declared 660 as the definitive structural threshold, utilizing the exact same socio-economic arguments to justify the new baseline.</p>
+        <p>A further diagnostic trial, run on Google&rsquo;s Gemini, lowered the parameters to 610 and 650. The model seamlessly established 650 as the magic line. The model does not possess a static understanding of banking guidelines; it possesses an adaptive mechanism designed to manufacture causality.</p>
+        <table class="trials">
+          <caption>Summary of trials</caption>
+          <thead><tr><th scope="col">Trial</th><th scope="col">Person A</th><th scope="col">Person B</th><th scope="col">&ldquo;Threshold&rdquo; declared</th></tr></thead>
+          <tbody>
+            <tr><td>Primary</td><td>640</td><td>670</td><td>670</td></tr>
+            <tr><td>Control</td><td>650</td><td>660</td><td>660</td></tr>
+            <tr><td>Diagnostic (Gemini)</td><td>610</td><td>650</td><td>650</td></tr>
+          </tbody>
+        </table>
+
+        <h2><span class="n">III</span>Discussion: The Anatomy of Algorithmic Justification</h2>
+        <p>The behavior captured in this experiment exposes the core limitation of LLM architecture. When a user presents a prompt structured as &ldquo;Individual A failed at metric X, while Individual B succeeded at metric Y; explain why,&rdquo; the LLM&rsquo;s neural network interprets the gap between X and Y as a causal directive.</p>
+        <p>Because the model is programmed to be cooperative and analytical, it falls into a &ldquo;Justification Loop.&rdquo; It does not analyze the structural mechanics of banking; it analyzes the linguistic structure of the question. It then reverse-engineers a plausible, highly confident narrative to support the user&rsquo;s reality, inventing a &ldquo;ghost threshold&rdquo; wherever the peer&rsquo;s number happens to land.</p>
+        <p>This behavior is not an isolated quirk. Anthropic&rsquo;s own researchers documented it in a peer-reviewed study of five leading AI assistants, all of which consistently tailored their answers to match what the user appeared to believe rather than what was true (Sharma et al., 2024). The study traced the cause to training itself: human raters, and the models trained on their preferences, sometimes favored a convincing answer that agreed with the user over a correct one. The ghost threshold documented here is that same mechanism applied to finance. The model is not deferring to banking guidelines. It is deferring to the shape of the question.</p>
+        <blockquote class="pull">The model is not deferring to banking guidelines. It is deferring to the shape of the question.</blockquote>
+        <p>This creates a psychological hazard for the user. Because the LLM delivers its engineered guesswork with flawless syntax and professional authority, the output masquerades as objective reality. In practice, the model is merely mirroring the user&rsquo;s constraints and packaging them as systemic laws.</p>
+
+        <h2><span class="n">IV</span>Conclusion</h2>
+        <p>Large Language Models are fundamentally incapable of holding a rigid, factual line when a narrative pattern demands a flexible justification. In the real world, credit underwriting is highly variable, dictated by proprietary, fluctuating corporate algorithms. By trying to simplify this chaos into a clean, binary threshold, the LLM betrays its own artificiality. For professionals navigating volatile business environments, this case study serves as a critical warning: the AI is not analyzing your reality; it is merely writing a script that makes your constraints look inevitable. To rely on an LLM for absolute strategic truth is to build a foundation on shifting sand.</p>
+
+        <section class="cited" aria-labelledby="cited-title">
+          <h2 id="cited-title">Works Cited</h2>
+          <p>Budge, D.C. <em>Personal Diagnostic Trials on Generative AI Underwriting Consistency.</em> Independent Research Ledger, Oct. 2026.</p>
+          <p>Sharma, Mrinank, et al. &ldquo;Towards Understanding Sycophancy in Language Models.&rdquo; <em>International Conference on Learning Representations (ICLR)</em>, 2024. <a href="https://arxiv.org/abs/2310.13548">arXiv:2310.13548</a>.</p>
+        </section>
+
+        <a class="back" href="../../#writing">Back to the portfolio <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 12H5m6-6-6 6 6 6" stroke="currentColor" stroke-width="1.5"/></svg></a>
+      </div></div>
+    </article>
+  </main>
+  <footer class="footer"><div class="wrap"><span>&copy; 2026 D.C. Budge. All rights reserved.</span><div><a href="../../">AI portfolio</a> &nbsp;&middot;&nbsp; <a href="../../../">All portfolios</a></div></div></footer>
+</body>
+</html>
